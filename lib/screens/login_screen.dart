@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/constants.dart';
-import '../utils/validators.dart';
 import '../widgets/custom_text_field.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -21,6 +20,10 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _rememberMe = false;
   bool _isLoading = false;
 
+  // Default admin credentials
+  static const String _defaultEmail = 'admin@gmail.com';
+  static const String _defaultPassword = 'admin123';
+
   @override
   void initState() {
     super.initState();
@@ -37,11 +40,13 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _loadSavedCredentials() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final savedEmail = prefs.getString('saved_email');
-      final savedPassword = prefs.getString('saved_password');
-      final rememberMe = prefs.getBool('remember_me') ?? false;
+      
+      // Get stored credentials or use default
+      String savedEmail = prefs.getString('admin_email') ?? _defaultEmail;
+      String savedPassword = prefs.getString('admin_password') ?? _defaultPassword;
+      bool rememberMe = prefs.getBool('remember_me') ?? false;
 
-      if (rememberMe && savedEmail != null && savedPassword != null) {
+      if (rememberMe) {
         setState(() {
           _emailController.text = savedEmail;
           _passwordController.text = savedPassword;
@@ -58,12 +63,12 @@ class _LoginScreenState extends State<LoginScreen> {
       final prefs = await SharedPreferences.getInstance();
       
       if (_rememberMe) {
-        await prefs.setString('saved_email', _emailController.text);
-        await prefs.setString('saved_password', _passwordController.text);
+        await prefs.setString('admin_email', _emailController.text);
+        await prefs.setString('admin_password', _passwordController.text);
         await prefs.setBool('remember_me', true);
       } else {
-        await prefs.remove('saved_email');
-        await prefs.remove('saved_password');
+        await prefs.remove('admin_email');
+        await prefs.remove('admin_password');
         await prefs.setBool('remember_me', false);
       }
     } catch (e) {
@@ -81,39 +86,15 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      // Check if user is registered
+      // Get stored credentials or use default
       final prefs = await SharedPreferences.getInstance();
-      final isRegistered = prefs.getBool('is_registered') ?? false;
-      
-      if (!isRegistered) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'لا يوجد حساب مسجل. يرجى إنشاء حساب أولاً.',
-                style: GoogleFonts.tajawal(),
-              ),
-              backgroundColor: AppColors.error,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
-              ),
-            ),
-          );
-          setState(() {
-            _isLoading = false;
-          });
-        }
-        return;
-      }
-      
-      // Verify credentials
-      final storedPassword = prefs.getString('user_password');
-      final storedEmail = prefs.getString('user_email');
+      String storedEmail = prefs.getString('admin_email') ?? _defaultEmail;
+      String storedPassword = prefs.getString('admin_password') ?? _defaultPassword;
       
       final inputEmail = _emailController.text.trim();
       final inputPassword = _passwordController.text.trim();
       
+      // Verify credentials - only accept admin account
       if (inputEmail != storedEmail || inputPassword != storedPassword) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -138,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
       
       await _saveCredentials();
       
-      await Future.delayed(const Duration(seconds: 1));
+      await Future.delayed(const Duration(milliseconds: 500));
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -202,16 +183,14 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: AppDimensions.paddingXLarge),
+                  const SizedBox(height: AppDimensions.paddingXLarge * 2),
                   _buildHeader(),
                   const SizedBox(height: AppDimensions.paddingXLarge * 2),
                   _buildLoginForm(),
                   const SizedBox(height: AppDimensions.paddingLarge),
                   _buildRememberMe(),
-                  const SizedBox(height: AppDimensions.paddingLarge),
+                  const SizedBox(height: AppDimensions.paddingLarge * 2),
                   _buildLoginButton(),
-                  const SizedBox(height: AppDimensions.paddingLarge),
-                  _buildSignUpLink(),
                 ],
               ),
             ),
@@ -225,11 +204,11 @@ class _LoginScreenState extends State<LoginScreen> {
     return Column(
       children: [
         Container(
-          width: 100,
-          height: 100,
+          width: 120,
+          height: 120,
           decoration: BoxDecoration(
             color: AppColors.primary,
-            borderRadius: BorderRadius.circular(25),
+            borderRadius: BorderRadius.circular(30),
             boxShadow: [
               BoxShadow(
                 color: AppColors.primary.withOpacity(0.3),
@@ -239,14 +218,14 @@ class _LoginScreenState extends State<LoginScreen> {
             ],
           ),
           child: const Icon(
-            Icons.person,
-            size: 50,
+            Icons.admin_panel_settings,
+            size: 60,
             color: Colors.white,
           ),
         ),
         const SizedBox(height: AppDimensions.paddingLarge),
         Text(
-          AppStrings.welcomeBack,
+          'تسجيل دخول المسؤول',
           style: GoogleFonts.tajawal(
             fontSize: 28,
             fontWeight: FontWeight.bold,
@@ -256,7 +235,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         const SizedBox(height: AppDimensions.paddingSmall),
         Text(
-          AppStrings.loginSubtitle,
+          'أدخل بيانات حسابك للوصول للنظام',
           style: GoogleFonts.tajawal(
             fontSize: 16,
             color: AppColors.textSecondary,
@@ -285,19 +264,29 @@ class _LoginScreenState extends State<LoginScreen> {
         children: [
           CustomTextField(
             controller: _emailController,
-            labelText: AppStrings.email,
-            hintText: 'example@email.com',
+            labelText: 'البريد الإلكتروني',
+            hintText: 'admin@gmail.com',
             prefixIcon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
-            validator: Validators.validateEmail,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'يرجى إدخال البريد الإلكتروني';
+              }
+              return null;
+            },
           ),
           const SizedBox(height: AppDimensions.paddingMedium),
           CustomTextField(
             controller: _passwordController,
-            labelText: AppStrings.password,
+            labelText: 'كلمة المرور',
             prefixIcon: Icons.lock_outline,
             obscureText: _obscurePassword,
-            validator: Validators.validatePassword,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'يرجى إدخال كلمة المرور';
+              }
+              return null;
+            },
             suffixIcon: IconButton(
               icon: Icon(
                 _obscurePassword
@@ -306,9 +295,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 color: AppColors.textSecondary,
               ),
               onPressed: _togglePasswordVisibility,
-              tooltip: _obscurePassword
-                  ? AppStrings.showPassword
-                  : AppStrings.hidePassword,
             ),
           ),
         ],
@@ -332,7 +318,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
         Text(
-          AppStrings.rememberMe,
+          'تذكرني',
           style: GoogleFonts.tajawal(
             fontSize: 14,
             color: AppColors.textPrimary,
@@ -367,44 +353,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               )
             : Text(
-                AppStrings.login,
+                'تسجيل الدخول',
                 style: GoogleFonts.tajawal(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
       ),
-    );
-  }
-
-  Widget _buildSignUpLink() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          AppStrings.dontHaveAccount,
-          style: GoogleFonts.tajawal(
-            fontSize: 14,
-            color: AppColors.textSecondary,
-          ),
-        ),
-        TextButton(
-          onPressed: () {
-            Navigator.pushNamed(context, '/signup');
-          },
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.primary,
-          ),
-          child: Text(
-            AppStrings.signUp,
-            style: GoogleFonts.tajawal(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primary,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
