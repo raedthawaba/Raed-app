@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../utils/constants.dart';
+import 'brigade_section1_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -145,7 +146,17 @@ class HomeScreen extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          _showSectionDialog(context, title);
+          // Navigate to Brigade Section 1
+          if (sectionNumber == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const BrigadeSection1Screen(),
+              ),
+            );
+          } else {
+            _showSectionDialog(context, title);
+          }
         },
         borderRadius: BorderRadius.circular(20),
         child: Container(
