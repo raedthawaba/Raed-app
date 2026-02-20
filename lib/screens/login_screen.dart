@@ -54,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
         });
       }
     } catch (e) {
-      debugPrint('Error loading saved credentials: \$e');
+      debugPrint('Error loading saved credentials: $e');
     }
   }
 
@@ -72,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.setBool('remember_me', false);
       }
     } catch (e) {
-      debugPrint('Error saving credentials: \$e');
+      debugPrint('Error saving credentials: $e');
     }
   }
 
@@ -143,7 +143,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '\${AppStrings.loginError}: \$e',
+              '${AppStrings.loginError}: $e',
               style: GoogleFonts.tajawal(),
             ),
             backgroundColor: AppColors.error,
