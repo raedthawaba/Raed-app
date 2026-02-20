@@ -11,10 +11,14 @@ class AppColors {
   static const Color error = Color(0xFFE74C3C);
   static const Color success = Color(0xFF27AE60);
   static const Color divider = Color(0xFFDFE6E9);
+  
+  // Military theme colors
+  static const Color militaryGreen = Color(0xFF2E5B4B);
+  static const Color gold = Color(0xFFD4AF37);
 }
 
 class AppStrings {
-  static const String appName = 'تطبيق رائد';
+  static const String appName = 'نظام إدارة الألوية';
   static const String welcomeBack = 'مرحباً بعودتك';
   static const String loginSubtitle = 'سجل دخولك للمتابعة';
   static const String email = 'البريد الإلكتروني';
@@ -24,6 +28,7 @@ class AppStrings {
   static const String logout = 'تسجيل الخروج';
   static const String dontHaveAccount = 'ليس لديك حساب؟';
   static const String signUp = 'سجل الآن';
+  static const String haveAccount = 'لديك حساب بالفعل؟';
   static const String emailRequired = 'يرجى إدخال البريد الإلكتروني';
   static const String invalidEmail = 'صيغة البريد الإلكتروني غير صحيحة';
   static const String passwordRequired = 'يرجى إدخال كلمة المرور';
@@ -32,6 +37,20 @@ class AppStrings {
   static const String loginError = 'فشل تسجيل الدخول';
   static const String showPassword = 'إظهار كلمة المرور';
   static const String hidePassword = 'إخفاء كلمة المرور';
+  
+  // Sign Up
+  static const String signUpTitle = 'إنشاء حساب جديد';
+  static const String signUpSubtitle = 'أدخل بياناتك للتسجيل';
+  static const String fullName = 'الاسم الرباعي';
+  static const String militaryNumber = 'الرقم العسكري';
+  static const String confirmPassword = 'تأكيد كلمة المرور';
+  static const String register = 'تسجيل';
+  static const String fullNameRequired = 'يرجى إدخال الاسم الرباعي';
+  static const String militaryNumberRequired = 'يرجى إدخال الرقم العسكري';
+  static const String militaryNumberTooShort = 'الرقم العسكري يجب أن يكون 6 أرقام على الأقل';
+  static const String passwordMismatch = 'كلمات المرور غير متطابقة';
+  static const String registrationSuccess = 'تم إنشاء الحساب بنجاح';
+  static const String registrationError = 'فشل إنشاء الحساب';
   
   // Home Screen
   static const String homeTitle = 'الرئيسية';
@@ -45,6 +64,21 @@ class AppStrings {
   static const String brigadeSection4 = 'قسم اللواء الرابع';
   static const String brigadeSection5 = 'قسم اللواء الخامس';
   static const String brigadeSection6 = 'قسم اللواء السادس';
+  
+  // Brigade Section 1 Sub-sections
+  static const String brigade1Section1 = 'قسم البشرية';
+  static const String brigade1Section2 = 'قسم التسليح';
+  static const String brigade1Section3 = 'قسم الشؤون الإدارية';
+  static const String brigade1Section4 = 'قسم الاستخبارات';
+  static const String brigade1Section5 = 'القسم الفني';
+  static const String brigade1Section6 = 'القسم الطبي';
+  static const String brigade1Section7 = 'قسم الشرطة';
+  static const String brigade1Section8 = 'قسم السيطرة';
+  static const String brigade1Section9 = 'قسم الأشغال';
+  static const String brigade1Section10 = 'قسم رئاسة';
+  static const String brigade1Section11 = 'قسم الكتائب';
+  static const String brigade1Section12 = 'قسم التوجيه المعنوي';
+  static const String brigade1Section13 = 'قسم المالية';
 }
 
 class AppDimensions {
