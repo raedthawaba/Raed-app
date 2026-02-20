@@ -26,9 +26,6 @@ class AppStrings {
   static const String rememberMe = 'تذكرني';
   static const String login = 'تسجيل الدخول';
   static const String logout = 'تسجيل الخروج';
-  static const String dontHaveAccount = 'ليس لديك حساب؟';
-  static const String signUp = 'سجل الآن';
-  static const String haveAccount = 'لديك حساب بالفعل؟';
   static const String emailRequired = 'يرجى إدخال البريد الإلكتروني';
   static const String invalidEmail = 'صيغة البريد الإلكتروني غير صحيحة';
   static const String passwordRequired = 'يرجى إدخال كلمة المرور';
@@ -37,20 +34,6 @@ class AppStrings {
   static const String loginError = 'فشل تسجيل الدخول';
   static const String showPassword = 'إظهار كلمة المرور';
   static const String hidePassword = 'إخفاء كلمة المرور';
-  
-  // Sign Up
-  static const String signUpTitle = 'إنشاء حساب جديد';
-  static const String signUpSubtitle = 'أدخل بياناتك للتسجيل';
-  static const String fullName = 'الاسم الرباعي';
-  static const String militaryNumber = 'الرقم العسكري';
-  static const String confirmPassword = 'تأكيد كلمة المرور';
-  static const String register = 'تسجيل';
-  static const String fullNameRequired = 'يرجى إدخال الاسم الرباعي';
-  static const String militaryNumberRequired = 'يرجى إدخال الرقم العسكري';
-  static const String militaryNumberTooShort = 'الرقم العسكري يجب أن يكون 6 أرقام على الأقل';
-  static const String passwordMismatch = 'كلمات المرور غير متطابقة';
-  static const String registrationSuccess = 'تم إنشاء الحساب بنجاح';
-  static const String registrationError = 'فشل إنشاء الحساب';
   
   // Home Screen
   static const String homeTitle = 'الرئيسية';
