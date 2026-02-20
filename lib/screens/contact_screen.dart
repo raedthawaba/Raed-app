@@ -192,12 +192,6 @@ class _ContactScreenState extends State<ContactScreen> {
                   child: Icon(Icons.message, color: AppColors.textSecondary),
                 ),
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'يرجى إدخال الرسالة';
-                }
-                return null;
-              },
             ),
           ),
           const SizedBox(height: AppDimensions.paddingLarge),
@@ -341,11 +335,11 @@ class _ContactScreenState extends State<ContactScreen> {
           children: [
             _buildSocialButton(Icons.facebook, const Color(0xFF1877F2)),
             const SizedBox(width: AppDimensions.paddingMedium),
-            _buildSocialButton(Icons.twitter_x, const Color(0xFF000000)),
+            _buildSocialButton(Icons.alternate_email, const Color(0xFF000000)),
             const SizedBox(width: AppDimensions.paddingMedium),
             _buildSocialButton(Icons.camera_alt, const Color(0xFFE4405F)),
             const SizedBox(width: AppDimensions.paddingMedium),
-            _buildSocialButton(Icons.whatsapp, const Color(0xFF25D366)),
+            _buildSocialButton(Icons.phone, const Color(0xFF25D366)),
           ],
         ),
       ],
