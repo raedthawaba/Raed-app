@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'utils/constants.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/signup_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -112,48 +113,6 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomeScreen(),
         '/signup': (context) => const SignUpScreen(),
       },
-    );
-  }
-}
-
-class SignUpScreen extends StatelessWidget {
-  const SignUpScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('إنشاء حساب جديد'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.person_add,
-              size: 100,
-              color: AppColors.primary,
-            ),
-            const SizedBox(height: AppDimensions.paddingLarge),
-            Text(
-              'صفحة التسجيل',
-              style: GoogleFonts.tajawal(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            const SizedBox(height: AppDimensions.paddingMedium),
-            Text(
-              '(قم بإنشاء صفحة التسجيل هنا)',
-              style: GoogleFonts.tajawal(
-                fontSize: 16,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
