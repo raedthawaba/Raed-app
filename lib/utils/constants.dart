@@ -21,6 +21,7 @@ class AppStrings {
   static const String password = 'كلمة المرور';
   static const String rememberMe = 'تذكرني';
   static const String login = 'تسجيل الدخول';
+  static const String logout = 'تسجيل الخروج';
   static const String dontHaveAccount = 'ليس لديك حساب؟';
   static const String signUp = 'سجل الآن';
   static const String emailRequired = 'يرجى إدخال البريد الإلكتروني';
@@ -31,6 +32,19 @@ class AppStrings {
   static const String loginError = 'فشل تسجيل الدخول';
   static const String showPassword = 'إظهار كلمة المرور';
   static const String hidePassword = 'إخفاء كلمة المرور';
+  
+  // Home Screen
+  static const String homeTitle = 'الرئيسية';
+  static const String welcomeMessage = 'مرحباً بك';
+  static const String selectSection = 'اختر القسم المطلوب';
+  
+  // Brigade Sections
+  static const String brigadeSection1 = 'قسم اللواء الأول';
+  static const String brigadeSection2 = 'قسم اللواء الثاني';
+  static const String brigadeSection3 = 'قسم اللواء الثالث';
+  static const String brigadeSection4 = 'قسم اللواء الرابع';
+  static const String brigadeSection5 = 'قسم اللواء الخامس';
+  static const String brigadeSection6 = 'قسم اللواء السادس';
 }
 
 class AppDimensions {
