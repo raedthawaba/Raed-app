@@ -81,9 +81,64 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
+      // Check if user is registered
+      final prefs = await SharedPreferences.getInstance();
+      final isRegistered = prefs.getBool('is_registered') ?? false;
+      
+      if (!isRegistered) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'لا يوجد حساب مسجل. يرجى إنشاء حساب أولاً.',
+                style: GoogleFonts.tajawal(),
+              ),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
+              ),
+            ),
+          );
+          setState(() {
+            _isLoading = false;
+          });
+        }
+        return;
+      }
+      
+      // Verify credentials
+      final storedPassword = prefs.getString('user_password');
+      final storedEmail = prefs.getString('user_email');
+      
+      final inputEmail = _emailController.text.trim();
+      final inputPassword = _passwordController.text.trim();
+      
+      if (inputEmail != storedEmail || inputPassword != storedPassword) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'البريد الإلكتروني أو كلمة المرور غير صحيحة',
+                style: GoogleFonts.tajawal(),
+              ),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
+              ),
+            ),
+          );
+          setState(() {
+            _isLoading = false;
+          });
+        }
+        return;
+      }
+      
       await _saveCredentials();
       
-      await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 1));
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
