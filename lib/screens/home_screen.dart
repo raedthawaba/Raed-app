@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../utils/constants.dart';
-import 'settings_screen.dart';
+import 'department_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -12,7 +12,7 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          'الصفحة الرئيسية',
+          AppStrings.appName,
           style: GoogleFonts.tajawal(
             fontWeight: FontWeight.bold,
           ),
@@ -55,9 +55,9 @@ class HomeScreen extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppDimensions.paddingLarge),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.primary,
-        borderRadius: const BorderRadius.only(
+        borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(30),
           bottomRight: Radius.circular(30),
         ),
@@ -65,7 +65,7 @@ class HomeScreen extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            'مرحباً بك',
+            AppStrings.welcomeMessage,
             style: GoogleFonts.tajawal(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -74,7 +74,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: AppDimensions.paddingSmall),
           Text(
-            'نظام إدارة الكتائب',
+            AppStrings.selectSection,
             style: GoogleFonts.tajawal(
               fontSize: 16,
               color: Colors.white70,
@@ -86,39 +86,6 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildSectionsGrid(BuildContext context) {
-    final List<Map<String, dynamic>> sections = [
-      {
-        'title': 'قسم الكتائب 1',
-        'icon': Icons.shield,
-        'color': const Color(0xFF1565C0),
-      },
-      {
-        'title': 'قسم الكتائب 2',
-        'icon': Icons.security,
-        'color': const Color(0xFF2E7D32),
-      },
-      {
-        'title': 'قسم الكتائب 3',
-        'icon': Icons.group,
-        'color': const Color(0xFFE65100),
-      },
-      {
-        'title': 'قسم الكتائب 4',
-        'icon': Icons.assignment,
-        'color': const Color(0xFF6A1B9A),
-      },
-      {
-        'title': 'قسم الكتائب 5',
-        'icon': Icons.assessment,
-        'color': const Color(0xFF00838F),
-      },
-      {
-        'title': 'قسم الكتائب 6',
-        'icon': Icons.military_tech,
-        'color': const Color(0xFFC62828),
-      },
-    ];
-
     return Padding(
       padding: const EdgeInsets.all(AppDimensions.paddingMedium),
       child: GridView.builder(
@@ -128,13 +95,14 @@ class HomeScreen extends StatelessWidget {
           mainAxisSpacing: 16,
           childAspectRatio: 1.1,
         ),
-        itemCount: sections.length,
+        itemCount: BrigadeData.brigades.length,
         itemBuilder: (context, index) {
+          final brigade = BrigadeData.brigades[index];
           return _buildSectionCard(
             context,
-            sections[index]['title'],
-            sections[index]['icon'],
-            sections[index]['color'],
+            brigade.name,
+            brigade.icon,
+            brigade.color,
           );
         },
       ),
@@ -151,7 +119,12 @@ class HomeScreen extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          _showSectionDialog(context, title);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DepartmentScreen(brigadeName: title),
+            ),
+          );
         },
         borderRadius: BorderRadius.circular(20),
         child: Container(
@@ -204,41 +177,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  void _showSectionDialog(BuildContext context, String sectionTitle) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: Text(
-          sectionTitle,
-          style: GoogleFonts.tajawal(
-            fontWeight: FontWeight.bold,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        content: Text(
-          'سيتم تطوير هذا القسم قريباً',
-          style: GoogleFonts.tajawal(),
-          textAlign: TextAlign.center,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'حسناً',
-              style: GoogleFonts.tajawal(
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -247,7 +185,7 @@ class HomeScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
         ),
         title: Text(
-          'تسجيل الخروج',
+          AppStrings.logout,
           style: GoogleFonts.tajawal(
             fontWeight: FontWeight.bold,
           ),
@@ -277,7 +215,7 @@ class HomeScreen extends StatelessWidget {
               backgroundColor: AppColors.error,
             ),
             child: Text(
-              'تسجيل الخروج',
+              AppStrings.logout,
               style: GoogleFonts.tajawal(),
             ),
           ),
