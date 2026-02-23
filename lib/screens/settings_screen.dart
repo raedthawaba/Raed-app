@@ -15,7 +15,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
   late TabController _tabController;
 
   // Account settings
-  final _emailController = TextEditingController(text: 'admin@gmail.com');
+  final _currentEmailController = TextEditingController();
   final _currentPasswordController = TextEditingController();
   final _newEmailController = TextEditingController();
   final _newPasswordController = TextEditingController();
@@ -28,22 +28,26 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
   bool _vibrationEnabled = true;
   String _language = 'العربية';
 
-  // Default admin credentials
-  static const String _defaultEmail = 'admin@gmail.com';
-  static const String _defaultPassword = 'admin123';
-
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _loadAdminInfo();
+  }
+
+  Future<void> _loadAdminInfo() async {
+    final email = await DatabaseHelper.instance.getAdminEmail();
+    setState(() {
+      _currentEmailController.text = email;
+    });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
-    _emailController.dispose();
+    _currentEmailController.dispose();
     _currentPasswordController.dispose();
     _newEmailController.dispose();
     _newPasswordController.dispose();
@@ -97,7 +101,6 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
 
     try {
       final success = await DatabaseHelper.instance.updateAdminCredentials(
-        currentEmail: _defaultEmail,
         currentPassword: currentPassword,
         newEmail: newEmail,
         newPassword: newPassword,
@@ -115,7 +118,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
         // Navigate to login after a short delay
         await Future.delayed(const Duration(seconds: 2));
         if (mounted) {
-          Navigator.pushReplacementNamed(context, '/login');
+          Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
         }
       } else {
         _showSnackBar('كلمة المرور الحالية غير صحيحة', AppColors.error);
@@ -172,7 +175,7 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
           _buildSectionHeader('معلومات الحساب', Icons.person),
           const SizedBox(height: 16),
           CustomTextField(
-            controller: _emailController,
+            controller: _currentEmailController,
             labelText: 'البريد الإلكتروني الحالي',
             prefixIcon: Icons.email,
             enabled: false,
@@ -282,7 +285,6 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
               setState(() {
                 _notificationsEnabled = value;
               });
-              _saveSettings();
             },
             icon: Icons.notifications_active,
           ),
@@ -297,7 +299,6 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
               setState(() {
                 _darkModeEnabled = value;
               });
-              _saveSettings();
             },
             icon: Icons.dark_mode,
           ),
@@ -312,27 +313,32 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
               setState(() {
                 _soundEnabled = value;
               });
-              _saveSettings();
             },
             icon: Icons.volume_up,
           ),
-          const SizedBox(height: 12),
           _buildSwitchTile(
             title: 'تفعيل الاهتزاز',
-            subtitle: 'اهتزاز عند التفاعل',
+            subtitle: 'اهتزاز الجهاز عند التنبيهات',
             value: _vibrationEnabled,
             onChanged: (value) {
               setState(() {
                 _vibrationEnabled = value;
               });
-              _saveSettings();
             },
             icon: Icons.vibration,
           ),
           const Divider(height: 32),
           _buildSectionHeader('اللغة', Icons.language),
           const SizedBox(height: 16),
-          _buildLanguageSelector(),
+          ListTile(
+            leading: const Icon(Icons.language, color: AppColors.primary),
+            title: Text('لغة التطبيق', style: GoogleFonts.tajawal()),
+            subtitle: Text(_language, style: GoogleFonts.tajawal(color: AppColors.textSecondary)),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () {
+              // Show language picker
+            },
+          ),
         ],
       ),
     );
@@ -341,15 +347,8 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
   Widget _buildSectionHeader(String title, IconData icon) {
     return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, color: AppColors.primary, size: 20),
-        ),
-        const SizedBox(width: 12),
+        Icon(icon, color: AppColors.primary, size: 20),
+        const SizedBox(width: 8),
         Text(
           title,
           style: GoogleFonts.tajawal(
@@ -369,157 +368,13 @@ class _SettingsScreenState extends State<SettingsScreen> with SingleTickerProvid
     required ValueChanged<bool> onChanged,
     required IconData icon,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: AppColors.primary, size: 24),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.tajawal(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                Text(
-                  subtitle,
-                  style: GoogleFonts.tajawal(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeColor: AppColors.primary,
-          ),
-        ],
-      ),
+    return SwitchListTile(
+      secondary: Icon(icon, color: AppColors.primary),
+      title: Text(title, style: GoogleFonts.tajawal()),
+      subtitle: Text(subtitle, style: GoogleFonts.tajawal(fontSize: 12, color: AppColors.textSecondary)),
+      value: value,
+      onChanged: onChanged,
+      activeColor: AppColors.primary,
     );
-  }
-
-  Widget _buildLanguageSelector() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.language, color: AppColors.primary, size: 24),
-              ),
-              const SizedBox(width: 16),
-              Text(
-                'اختر اللغة',
-                style: GoogleFonts.tajawal(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _buildLanguageOption('العربية', 'AR', _language == 'العربية'),
-          const SizedBox(height: 8),
-          _buildLanguageOption('English', 'EN', _language == 'English'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLanguageOption(String language, String code, bool isSelected) {
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _language = language;
-        });
-        _saveSettings();
-      },
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.transparent,
-            width: 2,
-          ),
-        ),
-        child: Row(
-          children: [
-            Text(
-              code,
-              style: GoogleFonts.tajawal(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: isSelected ? AppColors.primary : AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              language,
-              style: GoogleFonts.tajawal(
-                fontSize: 16,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? AppColors.primary : AppColors.textPrimary,
-              ),
-            ),
-            const Spacer(),
-            if (isSelected)
-              const Icon(Icons.check_circle, color: AppColors.primary, size: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _saveSettings() {
-    _showSnackBar('تم حفظ الإعدادات بنجاح', AppColors.success);
   }
 }
