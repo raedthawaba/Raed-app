@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/constants.dart';
 import '../utils/validators.dart';
 import '../widgets/custom_text_field.dart';
+import '../services/database_helper.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,57 +18,13 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   
   bool _obscurePassword = true;
-  bool _rememberMe = false;
   bool _isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadSavedCredentials();
-  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadSavedCredentials() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final savedEmail = prefs.getString('saved_email');
-      final savedPassword = prefs.getString('saved_password');
-      final rememberMe = prefs.getBool('remember_me') ?? false;
-
-      if (rememberMe && savedEmail != null && savedPassword != null) {
-        setState(() {
-          _emailController.text = savedEmail;
-          _passwordController.text = savedPassword;
-          _rememberMe = true;
-        });
-      }
-    } catch (e) {
-      debugPrint('Error loading saved credentials: $e');
-    }
-  }
-
-  Future<void> _saveCredentials() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      
-      if (_rememberMe) {
-        await prefs.setString('saved_email', _emailController.text);
-        await prefs.setString('saved_password', _passwordController.text);
-        await prefs.setBool('remember_me', true);
-      } else {
-        await prefs.remove('saved_email');
-        await prefs.remove('saved_password');
-        await prefs.setBool('remember_me', false);
-      }
-    } catch (e) {
-      debugPrint('Error saving credentials: $e');
-    }
   }
 
   Future<void> _handleLogin() async {
@@ -81,33 +37,60 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await _saveCredentials();
+      // Simulate network delay
+      await Future.delayed(const Duration(seconds: 1));
       
-      await Future.delayed(const Duration(seconds: 2));
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppStrings.loginSuccess,
-              style: GoogleFonts.tajawal(),
+      // Get input values
+      final inputEmail = _emailController.text.trim();
+      final inputPassword = _passwordController.text.trim();
+
+      // Authenticate using database
+      final isAuthenticated = await DatabaseHelper.instance.authenticateAdmin(
+        inputEmail,
+        inputPassword,
+      );
+
+      if (isAuthenticated) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'تم تسجيل الدخول بنجاح',
+                style: GoogleFonts.tajawal(),
+              ),
+              backgroundColor: AppColors.success,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
+              ),
             ),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
+          );
+          
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'البريد الإلكتروني أو كلمة المرور غير صحيحة',
+                style: GoogleFonts.tajawal(),
+              ),
+              backgroundColor: AppColors.error,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
+              ),
             ),
-          ),
-        );
-        
-        Navigator.pushReplacementNamed(context, '/home');
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '${AppStrings.loginError}: $e',
+              'حدث خطأ: $e',
               style: GoogleFonts.tajawal(),
             ),
             backgroundColor: AppColors.error,
@@ -152,11 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: AppDimensions.paddingXLarge * 2),
                   _buildLoginForm(),
                   const SizedBox(height: AppDimensions.paddingLarge),
-                  _buildRememberMe(),
-                  const SizedBox(height: AppDimensions.paddingLarge),
                   _buildLoginButton(),
-                  const SizedBox(height: AppDimensions.paddingLarge),
-                  _buildSignUpLink(),
                 ],
               ),
             ),
@@ -191,7 +170,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         const SizedBox(height: AppDimensions.paddingLarge),
         Text(
-          AppStrings.welcomeBack,
+          'نظام إدارة الكتائب',
           style: GoogleFonts.tajawal(
             fontSize: 28,
             fontWeight: FontWeight.bold,
@@ -201,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         const SizedBox(height: AppDimensions.paddingSmall),
         Text(
-          AppStrings.loginSubtitle,
+          'تسجيل الدخول إلى حسابك',
           style: GoogleFonts.tajawal(
             fontSize: 16,
             color: AppColors.textSecondary,
@@ -230,8 +209,8 @@ class _LoginScreenState extends State<LoginScreen> {
         children: [
           CustomTextField(
             controller: _emailController,
-            labelText: AppStrings.email,
-            hintText: 'example@email.com',
+            labelText: 'البريد الإلكتروني',
+            hintText: 'admin@gmail.com',
             prefixIcon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
             validator: Validators.validateEmail,
@@ -239,7 +218,7 @@ class _LoginScreenState extends State<LoginScreen> {
           const SizedBox(height: AppDimensions.paddingMedium),
           CustomTextField(
             controller: _passwordController,
-            labelText: AppStrings.password,
+            labelText: 'كلمة المرور',
             prefixIcon: Icons.lock_outline,
             obscureText: _obscurePassword,
             validator: Validators.validatePassword,
@@ -252,8 +231,8 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               onPressed: _togglePasswordVisibility,
               tooltip: _obscurePassword
-                  ? AppStrings.showPassword
-                  : AppStrings.hidePassword,
+                  ? 'إظهار كلمة المرور'
+                  : 'إخفاء كلمة المرور',
             ),
           ),
         ],
@@ -261,92 +240,61 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildRememberMe() {
-    return Row(
-      children: [
-        Checkbox(
-          value: _rememberMe,
-          onChanged: (value) {
-            setState(() {
-              _rememberMe = value ?? false;
-            });
-          },
-          activeColor: AppColors.primary,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-        Text(
-          AppStrings.rememberMe,
-          style: GoogleFonts.tajawal(
-            fontSize: 14,
-            color: AppColors.textPrimary,
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildLoginButton() {
-    return SizedBox(
-      height: AppDimensions.buttonHeight,
-      child: ElevatedButton(
-        onPressed: _isLoading ? null : _handleLogin,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: AppColors.primary.withOpacity(0.6),
-          elevation: 2,
-          shadowColor: AppColors.primary.withOpacity(0.3),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
           ),
-        ),
-        child: _isLoading
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                  strokeWidth: 2,
-                ),
-              )
-            : Text(
-                AppStrings.login,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.info_outline, color: AppColors.primary, size: 16),
+              const SizedBox(width: 8),
+              Text(
+                'الحساب الافتراضي: admin@gmail.com / admin123',
                 style: GoogleFonts.tajawal(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  color: AppColors.primary,
                 ),
               ),
-      ),
-    );
-  }
-
-  Widget _buildSignUpLink() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          AppStrings.dontHaveAccount,
-          style: GoogleFonts.tajawal(
-            fontSize: 14,
-            color: AppColors.textSecondary,
+            ],
           ),
         ),
-        TextButton(
-          onPressed: () {
-            Navigator.pushNamed(context, '/signup');
-          },
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.primary,
-          ),
-          child: Text(
-            AppStrings.signUp,
-            style: GoogleFonts.tajawal(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primary,
+        const SizedBox(height: 16),
+        SizedBox(
+          height: AppDimensions.buttonHeight,
+          child: ElevatedButton(
+            onPressed: _isLoading ? null : _handleLogin,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              disabledBackgroundColor: AppColors.primary.withOpacity(0.6),
+              elevation: 2,
+              shadowColor: AppColors.primary.withOpacity(0.3),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppDimensions.borderRadius),
+              ),
             ),
+            child: _isLoading
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Text(
+                    'تسجيل الدخول',
+                    style: GoogleFonts.tajawal(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
           ),
         ),
       ],
