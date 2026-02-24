@@ -172,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         const SizedBox(height: AppDimensions.paddingLarge),
         Text(
-          'نظام إدارة الكتائب',
+          'نظام إدارة الالوية',
           style: GoogleFonts.tajawal(
             fontSize: 28,
             fontWeight: FontWeight.bold,
